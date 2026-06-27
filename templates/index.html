@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sentinel — Monitoramento & Segurança Digital</title>
+  <meta name="description" content="Monitoramento de desempenho e proteção contra ameaças digitais em tempo real." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+<body>
+
+  <!-- ░░ HEADER ░░ -->
+  <header class="header" id="header">
+    <div class="container header__inner">
+      <a href="#hero" class="logo">
+        <span class="logo__icon">⬡</span>
+        <span class="logo__text">Sentinel</span>
+      </a>
+      <nav class="nav" id="nav">
+        <a href="#sobre" class="nav__link">Sobre</a>
+        <a href="#servicos" class="nav__link">Serviços</a>
+        <a href="#portfolio" class="nav__link">Portfólio</a>
+        <a href="#contato" class="nav__link nav__link--cta">Contato</a>
+      </nav>
+      <button class="burger" id="burger" aria-label="Abrir menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ░░ HERO ░░ -->
+  <section class="hero" id="hero">
+    <div class="hero__bg-grid"></div>
+    <div class="container hero__inner">
+      <div class="hero__content">
+        <p class="hero__eyebrow">Sistema Ativo <span class="dot-blink"></span></p>
+        <h1 class="hero__title">
+          Desempenho máximo.<br />
+          <span class="accent">Ameaças eliminadas.</span>
+        </h1>
+        <p class="hero__sub">
+          Monitoramento em tempo real, detecção proativa e resposta inteligente a ameaças digitais — tudo em uma plataforma.
+        </p>
+        <div class="hero__actions">
+          <a href="#servicos" class="btn btn--primary">Ver serviços</a>
+          <a href="#contato" class="btn btn--ghost">Falar conosco</a>
+        </div>
+      </div>
+      <div class="hero__terminal">
+        <div class="terminal">
+          <div class="terminal__bar">
+            <span class="terminal__dot terminal__dot--red"></span>
+            <span class="terminal__dot terminal__dot--yellow"></span>
+            <span class="terminal__dot terminal__dot--green"></span>
+            <span class="terminal__title">sentinel_scan.sh</span>
+          </div>
+          <div class="terminal__body" id="terminal-body">
+            <div class="terminal__line"><span class="terminal__prompt">$</span> <span id="typed-text"></span><span class="cursor">▊</span></div>
+          </div>
+        </div>
+        <div class="hero__stats">
+          <div class="stat">
+            <span class="stat__num" data-target="99.9">0</span><span class="stat__unit">%</span>
+            <span class="stat__label">Uptime</span>
+          </div>
+          <div class="stat">
+            <span class="stat__num" data-target="3200">0</span><span class="stat__unit">+</span>
+            <span class="stat__label">Ameaças bloqueadas</span>
+          </div>
+          <div class="stat">
+            <span class="stat__num" data-target="120">0</span><span class="stat__unit">ms</span>
+            <span class="stat__label">Resposta média</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="hero__scroll-hint">
+      <span>Role para explorar</span>
+      <svg width="16" height="24" viewBox="0 0 16 24" fill="none"><rect x="1" y="1" width="14" height="22" rx="7" stroke="currentColor" stroke-width="1.5"/><circle cx="8" cy="8" r="2" fill="currentColor" class="scroll-dot"/></svg>
+    </div>
+  </section>
+
+  <!-- ░░ SOBRE ░░ -->
+  <section class="section sobre" id="sobre">
+    <div class="container">
+      <div class="sobre__grid">
+        <div class="sobre__text">
+          <p class="section__eyebrow">Quem somos</p>
+          <h2 class="section__title">Segurança digital<br />com inteligência</h2>
+          <p class="sobre__desc">
+            A Sentinel nasceu da convicção de que proteção digital não deve ser reativa — ela deve ser invisível, contínua e inteligente. Combinamos monitoramento de desempenho com detecção avançada de ameaças para manter sistemas saudáveis 24/7.
+          </p>
+          <p class="sobre__desc">
+            Nossa equipe de especialistas atua nos bastidores para que você nunca precise se preocupar com o que não vê.
+          </p>
+          <ul class="sobre__bullets">
+            <li><span class="bullet-icon">▶</span> Monitoramento proativo de infraestrutura</li>
+            <li><span class="bullet-icon">▶</span> Resposta a incidentes em menos de 5 minutos</li>
+            <li><span class="bullet-icon">▶</span> Relatórios executivos mensais</li>
+          </ul>
+        </div>
+        <div class="sobre__visual">
+          <div class="radar">
+            <div class="radar__ring radar__ring--1"></div>
+            <div class="radar__ring radar__ring--2"></div>
+            <div class="radar__ring radar__ring--3"></div>
+            <div class="radar__sweep"></div>
+            <div class="radar__center"></div>
+            <div class="radar__dot" style="top:28%;left:62%"></div>
+            <div class="radar__dot radar__dot--threat" style="top:55%;left:30%"></div>
+            <div class="radar__dot" style="top:70%;left:68%"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ░░ SERVIÇOS ░░ -->
+  <section class="section servicos" id="servicos">
+    <div class="container">
+      <p class="section__eyebrow centered">O que fazemos</p>
+      <h2 class="section__title centered">Proteção em<br />cada camada</h2>
+      <div class="cards">
+
+        <div class="card">
+          <div class="card__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/></svg>
+          </div>
+          <h3 class="card__title">Monitoramento de Desempenho</h3>
+          <p class="card__desc">CPU, RAM, disco e rede sob vigilância constante. Alertas instantâneos quando algo sai do padrão.</p>
+        </div>
+
+        <div class="card card--featured">
+          <div class="card__badge">Principal</div>
+          <div class="card__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <h3 class="card__title">Detecção de Ameaças</h3>
+          <p class="card__desc">Análise comportamental e heurística para identificar malware, intrusões e atividades suspeitas antes que causem dano.</p>
+        </div>
+
+        <div class="card">
+          <div class="card__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+          </div>
+          <h3 class="card__title">Resposta a Incidentes</h3>
+          <p class="card__desc">Equipe de resposta rápida com playbooks automatizados e intervenção humana quando necessário.</p>
+        </div>
+
+        <div class="card">
+          <div class="card__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+          </div>
+          <h3 class="card__title">Relatórios & Analytics</h3>
+          <p class="card__desc">Dashboards executivos e relatórios técnicos detalhados para decisões baseadas em dados reais.</p>
+        </div>
+
+        <div class="card">
+          <div class="card__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"/></svg>
+          </div>
+          <h3 class="card__title">Segurança em Nuvem</h3>
+          <p class="card__desc">Proteção e conformidade para ambientes AWS, Azure e Google Cloud com visibilidade centralizada.</p>
+        </div>
+
+        <div class="card">
+          <div class="card__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+          </div>
+          <h3 class="card__title">Hardening & Compliance</h3>
+          <p class="card__desc">Endurecimento de sistemas e adequação a normas como LGPD, ISO 27001 e NIST.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ░░ PORTFÓLIO ░░ -->
+  <section class="section portfolio" id="portfolio">
+    <div class="container">
+      <p class="section__eyebrow centered">Cases</p>
+      <h2 class="section__title centered">Resultados reais</h2>
+      <div class="portfolio__grid">
+
+        <article class="portfolio__card">
+          <div class="portfolio__tag">E-commerce</div>
+          <h3 class="portfolio__name">Operação Escudo</h3>
+          <p class="portfolio__desc">Bloqueio de ataque DDoS de 40 Gbps em infraestrutura de e-commerce, mantendo 100% de disponibilidade durante Black Friday.</p>
+          <div class="portfolio__metrics">
+            <span><strong>0</strong> tempo de inatividade</span>
+            <span><strong>40 Gbps</strong> mitigados</span>
+          </div>
+        </article>
+
+        <article class="portfolio__card portfolio__card--accent">
+          <div class="portfolio__tag">Fintech</div>
+          <h3 class="portfolio__name">Projeto Vault</h3>
+          <p class="portfolio__desc">Implementação de SOC 24/7 e SIEM para fintech com 500k usuários, reduzindo falsos positivos em 80%.</p>
+          <div class="portfolio__metrics">
+            <span><strong>80%</strong> menos alertas</span>
+            <span><strong>SOC</strong> 24/7</span>
+          </div>
+        </article>
+
+        <article class="portfolio__card">
+          <div class="portfolio__tag">Saúde</div>
+          <h3 class="portfolio__name">Rede Segura</h3>
+          <p class="portfolio__desc">Adequação LGPD e proteção de dados sensíveis de pacientes em rede hospitalar com 12 unidades.</p>
+          <div class="portfolio__metrics">
+            <span><strong>12</strong> unidades</span>
+            <span><strong>LGPD</strong> compliant</span>
+          </div>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ░░ CONTATO ░░ -->
+  <section class="section contato" id="contato">
+    <div class="container">
+      <div class="contato__grid">
+        <div class="contato__text">
+          <p class="section__eyebrow">Entre em contato</p>
+          <h2 class="section__title">Seu sistema<br />está seguro?</h2>
+          <p class="contato__desc">Faça uma avaliação gratuita e descubra as vulnerabilidades antes que alguém as explore.</p>
+          <div class="contato__info">
+            <p><span class="accent">→</span> contato@sentinel.dev</p>
+            <p><span class="accent">→</span> +55 (71) 9 9999-0000</p>
+            <p><span class="accent">→</span> Salvador, BA — Brasil</p>
+          </div>
+        </div>
+        <form class="form" id="contact-form" novalidate>
+          <div class="form__group">
+            <label for="name" class="form__label">Nome</label>
+            <input type="text" id="name" name="name" class="form__input" placeholder="Seu nome completo" required />
+          </div>
+          <div class="form__group">
+            <label for="email" class="form__label">E-mail</label>
+            <input type="email" id="email" name="email" class="form__input" placeholder="seu@email.com" required />
+          </div>
+          <div class="form__group">
+            <label for="message" class="form__label">Mensagem</label>
+            <textarea id="message" name="message" class="form__input form__textarea" placeholder="Descreva sua necessidade..." rows="5" required></textarea>
+          </div>
+          <button type="submit" class="btn btn--primary btn--full" id="submit-btn">
+            <span class="btn__text">Enviar mensagem</span>
+            <span class="btn__loading" hidden>Enviando…</span>
+          </button>
+          <p class="form__feedback" id="form-feedback" role="alert"></p>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- ░░ FOOTER ░░ -->
+  <footer class="footer">
+    <div class="container footer__inner">
+      <div class="footer__brand">
+        <a href="#hero" class="logo">
+          <span class="logo__icon">⬡</span>
+          <span class="logo__text">Sentinel</span>
+        </a>
+        <p class="footer__tagline">Protegendo o que importa.</p>
+      </div>
+      <nav class="footer__nav">
+        <a href="#sobre">Sobre</a>
+        <a href="#servicos">Serviços</a>
+        <a href="#portfolio">Portfólio</a>
+        <a href="#contato">Contato</a>
+      </nav>
+      <p class="footer__copy">&copy; 2026 Sentinel. Todos os direitos reservados.</p>
+    </div>
+  </footer>
+
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

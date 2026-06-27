@@ -2,6 +2,8 @@
    SENTINEL — main.js
    ============================================================ */
 
+const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzt7Ywxg9ensxR6FoPcwM9QAxn2qfvoldSAbeJDOhCNPSrQ0HD241J0h8sRokAmeJywrQ/exec';
+
 // ── HEADER scroll state ──────────────────────────────────────
 const header = document.getElementById('header');
 window.addEventListener('scroll', () => {
@@ -17,7 +19,6 @@ burger.addEventListener('click', () => {
   burger.setAttribute('aria-expanded', open);
 });
 
-// Close nav on link click (mobile)
 document.querySelectorAll('.nav__link').forEach(link => {
   link.addEventListener('click', () => nav.classList.remove('open'));
 });
@@ -66,7 +67,7 @@ function typeText(text, el, speed, cb) {
 function showOutput(outputs, idx, cb) {
   if (idx >= outputs.length) { if (cb) setTimeout(cb, 1200); return; }
   const line = document.createElement('div');
-  line.className = `terminal__output`;
+  line.className = 'terminal__output';
   const inner = document.createElement('span');
   inner.className = outputs[idx].cls;
   inner.textContent = outputs[idx].text;
@@ -77,10 +78,8 @@ function showOutput(outputs, idx, cb) {
 }
 
 function runSequence() {
-  // Clear previous outputs
   outLines.forEach(l => l.remove());
   outLines = [];
-
   const seq = sequences[seqIdx % sequences.length];
   typeText(seq.command, typedText, 55, () => {
     showOutput(seq.outputs, 0, () => {
@@ -90,7 +89,6 @@ function runSequence() {
   });
 }
 
-// Start after a short delay
 setTimeout(runSequence, 800);
 
 // ── COUNTER ANIMATION ─────────────────────────────────────────
@@ -99,18 +97,16 @@ function animateCounter(el, target, decimals, duration) {
   const step = (now) => {
     const progress = Math.min((now - start) / duration, 1);
     const ease = 1 - Math.pow(1 - progress, 3);
-    const val = (target * ease).toFixed(decimals);
-    el.textContent = val;
+    el.textContent = (target * ease).toFixed(decimals);
     if (progress < 1) requestAnimationFrame(step);
   };
   requestAnimationFrame(step);
 }
 
-// ── INTERSECTION OBSERVER — reveal + counters ─────────────────
+// ── INTERSECTION OBSERVER ─────────────────────────────────────
 const revealEls = document.querySelectorAll(
   '.card, .portfolio__card, .sobre__grid, .contato__grid, .hero__stats'
 );
-
 revealEls.forEach(el => el.classList.add('reveal'));
 
 const counterEls = document.querySelectorAll('.stat__num');
@@ -127,7 +123,6 @@ const observer = new IntersectionObserver((entries) => {
 
 revealEls.forEach(el => observer.observe(el));
 
-// Counters triggered when stats section enters view
 const statsSection = document.querySelector('.hero__stats');
 if (statsSection) {
   const statsObserver = new IntersectionObserver((entries) => {
@@ -145,11 +140,11 @@ if (statsSection) {
 }
 
 // ── CONTACT FORM ──────────────────────────────────────────────
-const form        = document.getElementById('contact-form');
-const feedback    = document.getElementById('form-feedback');
-const submitBtn   = document.getElementById('submit-btn');
-const btnText     = submitBtn?.querySelector('.btn__text');
-const btnLoading  = submitBtn?.querySelector('.btn__loading');
+const form      = document.getElementById('contact-form');
+const feedback  = document.getElementById('form-feedback');
+const submitBtn = document.getElementById('submit-btn');
+const btnText   = submitBtn?.querySelector('.btn__text');
+const btnLoading = submitBtn?.querySelector('.btn__loading');
 
 if (form) {
   form.addEventListener('submit', async (e) => {
@@ -167,32 +162,27 @@ if (form) {
       return;
     }
 
-    // Loading state
-    btnText.hidden    = true;
-    btnLoading.hidden = false;
+    btnText.hidden     = true;
+    btnLoading.hidden  = false;
     submitBtn.disabled = true;
 
     try {
-      const res  = await fetch('/contact', {
+      await fetch(SHEETS_URL, {
         method: 'POST',
+        mode: 'no-cors',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, email, message })
       });
-      const data = await res.json();
 
-      if (data.success) {
-        feedback.textContent = data.message;
-        feedback.classList.add('success');
-        form.reset();
-      } else {
-        throw new Error(data.error || 'Erro ao enviar.');
-      }
+      feedback.textContent = 'Mensagem enviada! Entraremos em contato em breve.';
+      feedback.classList.add('success');
+      form.reset();
     } catch (err) {
-      feedback.textContent = err.message || 'Erro inesperado. Tente novamente.';
+      feedback.textContent = 'Erro ao enviar. Tente novamente.';
       feedback.classList.add('error');
     } finally {
-      btnText.hidden    = false;
-      btnLoading.hidden = true;
+      btnText.hidden     = false;
+      btnLoading.hidden  = true;
       submitBtn.disabled = false;
     }
   });

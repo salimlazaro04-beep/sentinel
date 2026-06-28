@@ -774,3 +774,99 @@ body {
 @media (prefers-reduced-motion: reduce) {
   *, .radar__sweep, .dot-blink, .scroll-dot, .cursor { animation: none !important; transition: none !important; }
 }
+
+/* ── PREÇOS ─────────────────────────────── */
+.precos { background: var(--bg); }
+
+.precos__grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.preco__card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 32px 24px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  transition: border-color var(--transition), transform var(--transition), box-shadow var(--transition);
+}
+
+.preco__card:hover {
+  border-color: rgba(255,107,0,0.4);
+  transform: translateY(-4px);
+  box-shadow: 0 16px 40px rgba(0,0,0,0.4);
+}
+
+.preco__card--featured {
+  border-color: var(--accent);
+  background: linear-gradient(135deg, rgba(255,107,0,0.08) 0%, var(--surface) 100%);
+}
+
+.preco__badge {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--accent);
+  color: var(--bg);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 4px 14px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+.preco__icon {
+  width: 40px;
+  height: 40px;
+  color: var(--accent);
+}
+
+.preco__icon svg { width: 100%; height: 100%; }
+
+.preco__nome {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.preco__desc {
+  color: var(--muted);
+  font-size: 0.88rem;
+  line-height: 1.6;
+  flex: 1;
+}
+
+.preco__valor {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: -0.03em;
+}
+
+.preco__valor span { font-size: 2.4rem; }
+
+.precos__obs {
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-top: 8px;
+}
+
+@media (max-width: 900px) {
+  .precos__grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 640px) {
+  .precos__grid { grid-template-columns: 1fr; }
+}

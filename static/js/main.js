@@ -146,32 +146,11 @@ const submitBtn  = document.getElementById('submit-btn');
 const btnText    = submitBtn?.querySelector('.btn__text');
 const btnLoading = submitBtn?.querySelector('.btn__loading');
 
-const MAX_MSGS = 3;
-let msgCount = parseInt(sessionStorage.getItem('sentinel_msg_count') || '0');
-
-function updateSubmitBtn() {
-  if (msgCount >= MAX_MSGS) {
-    submitBtn.disabled = true;
-    submitBtn.style.opacity = '0.5';
-    submitBtn.style.cursor = 'not-allowed';
-    feedback.textContent = 'Limite de ' + MAX_MSGS + ' mensagens atingido por sessão.';
-    feedback.className = 'form__feedback error';
-  }
-}
-
-updateSubmitBtn();
-
 if (form) {
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     feedback.textContent = '';
     feedback.className   = 'form__feedback';
-
-    if (msgCount >= MAX_MSGS) {
-      feedback.textContent = 'Limite de ' + MAX_MSGS + ' mensagens atingido. Tente mais tarde.';
-      feedback.classList.add('error');
-      return;
-    }
 
     const name    = document.getElementById('name').value.trim();
     const email   = document.getElementById('email').value.trim();
@@ -200,33 +179,38 @@ if (form) {
     submitBtn.disabled = true;
 
     try {
-      await fetch(SHEETS_URL, {
+      // Envia para o servidor Flask (que controla o limite por IP)
+      const res = await fetch('/contact', {
         method: 'POST',
-        mode: 'no-cors',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, email, message })
       });
 
-      msgCount++;
-      sessionStorage.setItem('sentinel_msg_count', msgCount);
+      const data = await res.json();
 
-      const restante = MAX_MSGS - msgCount;
-      feedback.textContent = restante > 0
-        ? 'Mensagem enviada! Você ainda pode enviar mais ' + restante + ' mensagem(ns).'
-        : 'Mensagem enviada! Limite de mensagens atingido.';
-      feedback.classList.add('success');
-      form.reset();
-      updateSubmitBtn();
+      if (data.success) {
+        // Também envia para o Google Sheets
+        fetch(SHEETS_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, message })
+        });
 
+        feedback.textContent = data.message;
+        feedback.classList.add('success');
+        form.reset();
+      } else {
+        feedback.textContent = data.error || 'Erro ao enviar.';
+        feedback.classList.add('error');
+      }
     } catch (err) {
       feedback.textContent = 'Erro ao enviar. Tente novamente.';
       feedback.classList.add('error');
     } finally {
-      if (msgCount < MAX_MSGS) {
-        btnText.hidden     = false;
-        btnLoading.hidden  = true;
-        submitBtn.disabled = false;
-      }
+      btnText.hidden     = false;
+      btnLoading.hidden  = true;
+      submitBtn.disabled = false;
     }
   });
 }

@@ -140,11 +140,26 @@ if (statsSection) {
 }
 
 // ── CONTACT FORM ──────────────────────────────────────────────
-const form      = document.getElementById('contact-form');
-const feedback  = document.getElementById('form-feedback');
-const submitBtn = document.getElementById('submit-btn');
-const btnText   = submitBtn?.querySelector('.btn__text');
+const form       = document.getElementById('contact-form');
+const feedback   = document.getElementById('form-feedback');
+const submitBtn  = document.getElementById('submit-btn');
+const btnText    = submitBtn?.querySelector('.btn__text');
 const btnLoading = submitBtn?.querySelector('.btn__loading');
+
+const MAX_MSGS = 3;
+let msgCount = parseInt(sessionStorage.getItem('sentinel_msg_count') || '0');
+
+function updateSubmitBtn() {
+  if (msgCount >= MAX_MSGS) {
+    submitBtn.disabled = true;
+    submitBtn.style.opacity = '0.5';
+    submitBtn.style.cursor = 'not-allowed';
+    feedback.textContent = 'Limite de ' + MAX_MSGS + ' mensagens atingido por sessão.';
+    feedback.className = 'form__feedback error';
+  }
+}
+
+updateSubmitBtn();
 
 if (form) {
   form.addEventListener('submit', async (e) => {
@@ -152,12 +167,30 @@ if (form) {
     feedback.textContent = '';
     feedback.className   = 'form__feedback';
 
+    if (msgCount >= MAX_MSGS) {
+      feedback.textContent = 'Limite de ' + MAX_MSGS + ' mensagens atingido. Tente mais tarde.';
+      feedback.classList.add('error');
+      return;
+    }
+
     const name    = document.getElementById('name').value.trim();
     const email   = document.getElementById('email').value.trim();
     const message = document.getElementById('message').value.trim();
 
-    if (!name || !email || !message) {
-      feedback.textContent = 'Por favor, preencha todos os campos.';
+    if (!name) {
+      feedback.textContent = 'Por favor, informe seu nome.';
+      feedback.classList.add('error');
+      return;
+    }
+
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      feedback.textContent = 'Por favor, informe um e-mail válido.';
+      feedback.classList.add('error');
+      return;
+    }
+
+    if (!message || message.length < 10) {
+      feedback.textContent = 'A mensagem deve ter pelo menos 10 caracteres.';
       feedback.classList.add('error');
       return;
     }
@@ -174,16 +207,26 @@ if (form) {
         body: JSON.stringify({ name, email, message })
       });
 
-      feedback.textContent = 'Mensagem enviada! Entraremos em contato em breve.';
+      msgCount++;
+      sessionStorage.setItem('sentinel_msg_count', msgCount);
+
+      const restante = MAX_MSGS - msgCount;
+      feedback.textContent = restante > 0
+        ? 'Mensagem enviada! Você ainda pode enviar mais ' + restante + ' mensagem(ns).'
+        : 'Mensagem enviada! Limite de mensagens atingido.';
       feedback.classList.add('success');
       form.reset();
+      updateSubmitBtn();
+
     } catch (err) {
       feedback.textContent = 'Erro ao enviar. Tente novamente.';
       feedback.classList.add('error');
     } finally {
-      btnText.hidden     = false;
-      btnLoading.hidden  = true;
-      submitBtn.disabled = false;
+      if (msgCount < MAX_MSGS) {
+        btnText.hidden     = false;
+        btnLoading.hidden  = true;
+        submitBtn.disabled = false;
+      }
     }
   });
 }

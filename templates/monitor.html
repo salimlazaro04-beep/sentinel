@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sentinel — Monitor ao Vivo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  <style>
+    :root {
+      --bg: #0D0D0D; --surface: #141414; --surface2: #1E1E1E;
+      --border: #2A2A2A; --accent: #FF6B00; --white: #FFFFFF; --muted: #888;
+      --ok: #28C940; --warn: #FFBD2E; --danger: #FF5F57;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--white); font-family: 'Space Grotesk', sans-serif; min-height: 100vh; }
+
+    .header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .logo { font-weight: 700; font-size: 1.1rem; color: var(--white); text-decoration: none; }
+    .logo span { color: var(--accent); }
+    .status-badge {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 0.82rem; color: var(--muted);
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+    .status-dot.online { background: var(--ok); box-shadow: 0 0 8px var(--ok); animation: pulse 1.5s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+    .container { max-width: 1100px; margin: 0 auto; padding: 32px 24px; }
+
+    .waiting {
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; min-height: 60vh; gap: 24px; text-align: center;
+    }
+    .waiting h2 { font-size: 1.6rem; font-weight: 700; }
+    .waiting p { color: var(--muted); max-width: 440px; line-height: 1.7; }
+    .token-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px 32px;
+      display: flex; flex-direction: column; gap: 12px; align-items: center;
+    }
+    .token-label { font-size: 0.78rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; }
+    .token-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.4rem;
+      color: var(--accent);
+      letter-spacing: 0.15em;
+    }
+    .download-btn {
+      display: inline-flex; align-items: center; gap: 10px;
+      background: var(--accent); color: var(--bg);
+      padding: 13px 28px; border-radius: 8px;
+      font-weight: 700; font-size: 0.95rem; text-decoration: none;
+      transition: background 0.2s;
+    }
+    .download-btn:hover { background: #ff8533; }
+
+    .dashboard { display: none; }
+    .dashboard.visible { display: block; }
+
+    .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+
+    .metric {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px 20px;
+      transition: border-color 0.3s;
+    }
+    .metric.ok    { border-color: rgba(40,201,64,0.3); }
+    .metric.warn  { border-color: rgba(255,189,46,0.3); }
+    .metric.danger{ border-color: rgba(255,95,87,0.4); }
+
+    .metric__label { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 10px; }
+    .metric__value { font-size: 2rem; font-weight: 700; letter-spacing: -0.03em; }
+    .metric__value.ok     { color: var(--ok); }
+    .metric__value.warn   { color: var(--warn); }
+    .metric__value.danger { color: var(--danger); }
+    .metric__sub  { font-size: 0.8rem; color: var(--muted); margin-top: 4px; }
+
+    .bar { height: 4px; background: var(--border); border-radius: 4px; margin-top: 12px; overflow: hidden; }
+    .bar__fill { height: 100%; border-radius: 4px; transition: width 0.5s ease; }
+    .bar__fill.ok     { background: var(--ok); }
+    .bar__fill.warn   { background: var(--warn); }
+    .bar__fill.danger { background: var(--danger); }
+
+    .panels { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .panel__header {
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.85rem; font-weight: 600;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .panel__header span { color: var(--accent); }
+    .panel__body { padding: 16px 20px; max-height: 280px; overflow-y: auto; }
+    .panel__body::-webkit-scrollbar { width: 4px; }
+    .panel__body::-webkit-scrollbar-track { background: transparent; }
+    .panel__body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    .process-item {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 0.82rem;
+    }
+    .process-item:last-child { border-bottom: none; }
+    .process-name { font-family: 'JetBrains Mono', monospace; color: var(--white); }
+    .process-cpu  { color: var(--muted); }
+    .process-cpu.high { color: var(--warn); }
+    .process-cpu.very-high { color: var(--danger); }
+
+    .alert-item {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 0.82rem;
+    }
+    .alert-item:last-child { border-bottom: none; }
+    .alert-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 4px; flex-shrink: 0; }
+    .alert-dot.ok     { background: var(--ok); }
+    .alert-dot.warn   { background: var(--warn); }
+    .alert-dot.danger { background: var(--danger); }
+    .alert-text { color: var(--muted); line-height: 1.5; }
+    .alert-time { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: #555; margin-top: 2px; }
+
+    .no-data { color: var(--muted); font-size: 0.85rem; text-align: center; padding: 20px; }
+
+    @media (max-width: 768px) {
+      .grid { grid-template-columns: repeat(2,1fr); }
+      .panels { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="header">
+  <a href="/" class="logo"><span>⬡</span> Sentinel</a>
+  <div class="status-badge">
+    <div class="status-dot" id="status-dot"></div>
+    <span id="status-text">Aguardando agente...</span>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- TELA DE ESPERA -->
+  <div class="waiting" id="waiting-screen">
+    <h2>Conecte o agente ao seu PC</h2>
+    <p>Baixe e execute o agente Sentinel no computador que deseja monitorar. Use o token abaixo para vinculá-lo ao seu dashboard.</p>
+    <div class="token-box">
+      <span class="token-label">Seu token de acesso</span>
+      <span class="token-value" id="token-display">---</span>
+    </div>
+    <a href="/download-agent" class="download-btn">
+      ⬇ Baixar Agente Sentinel
+    </a>
+    <p style="font-size:0.8rem;color:var(--muted);">Após executar o agente, esta página atualiza automaticamente.</p>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div class="dashboard" id="dashboard">
+    <div class="grid">
+      <div class="metric" id="m-cpu">
+        <div class="metric__label">CPU</div>
+        <div class="metric__value" id="cpu-val">—</div>
+        <div class="metric__sub" id="cpu-sub">Aguardando...</div>
+        <div class="bar"><div class="bar__fill" id="cpu-bar" style="width:0%"></div></div>
+      </div>
+      <div class="metric" id="m-ram">
+        <div class="metric__label">RAM</div>
+        <div class="metric__value" id="ram-val">—</div>
+        <div class="metric__sub" id="ram-sub">Aguardando...</div>
+        <div class="bar"><div class="bar__fill" id="ram-bar" style="width:0%"></div></div>
+      </div>
+      <div class="metric" id="m-disk">
+        <div class="metric__label">Disco</div>
+        <div class="metric__value" id="disk-val">—</div>
+        <div class="metric__sub" id="disk-sub">Aguardando...</div>
+        <div class="bar"><div class="bar__fill" id="disk-bar" style="width:0%"></div></div>
+      </div>
+      <div class="metric" id="m-net">
+        <div class="metric__label">Rede</div>
+        <div class="metric__value" id="net-val">—</div>
+        <div class="metric__sub" id="net-sub">Aguardando...</div>
+        <div class="bar"><div class="bar__fill ok" id="net-bar" style="width:100%"></div></div>
+      </div>
+    </div>
+
+    <div class="panels">
+      <div class="panel">
+        <div class="panel__header"><span>⚙</span> Processos ativos (top CPU)</div>
+        <div class="panel__body" id="processes-list">
+          <p class="no-data">Aguardando dados...</p>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel__header"><span>⚠</span> Alertas do sistema</div>
+        <div class="panel__body" id="alerts-list">
+          <p class="no-data">Nenhum alerta</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // Gera ou recupera token da sessão
+  let token = sessionStorage.getItem('sentinel_token');
+  if (!token) {
+    token = Math.random().toString(36).substr(2,4).toUpperCase() + '-' +
+            Math.random().toString(36).substr(2,4).toUpperCase();
+    sessionStorage.setItem('sentinel_token', token);
+  }
+  document.getElementById('token-display').textContent = token;
+
+  const socket = io();
+  const alerts = [];
+
+  socket.on('connect', () => {
+    socket.emit('join_dashboard', { token });
+  });
+
+  socket.on('dashboard_update', (data) => {
+    document.getElementById('waiting-screen').style.display = 'none';
+    document.getElementById('dashboard').classList.add('visible');
+    document.getElementById('status-dot').classList.add('online');
+    document.getElementById('status-text').textContent = 'Agente conectado — ao vivo';
+    updateDashboard(data);
+  });
+
+  socket.on('disconnect', () => {
+    document.getElementById('status-dot').classList.remove('online');
+    document.getElementById('status-text').textContent = 'Agente desconectado';
+  });
+
+  function getClass(val) {
+    if (val >= 90) return 'danger';
+    if (val >= 70) return 'warn';
+    return 'ok';
+  }
+
+  function updateMetric(id, val, sub, barId, metricId) {
+    const cls = getClass(val);
+    document.getElementById(id).textContent = val + '%';
+    document.getElementById(id).className = 'metric__value ' + cls;
+    document.getElementById(sub).textContent = document.getElementById(sub).dataset.info || '';
+    document.getElementById(barId).style.width = val + '%';
+    document.getElementById(barId).className = 'bar__fill ' + cls;
+    document.getElementById(metricId).className = 'metric ' + cls;
+  }
+
+  function updateDashboard(d) {
+    // CPU
+    updateMetric('cpu-val', d.cpu, 'cpu-sub', 'cpu-bar', 'm-cpu');
+    document.getElementById('cpu-sub').textContent = d.cpu_cores + ' núcleos · ' + d.cpu_freq + ' GHz';
+
+    // RAM
+    updateMetric('ram-val', d.ram_pct, 'ram-sub', 'ram-bar', 'm-ram');
+    document.getElementById('ram-sub').textContent = d.ram_used + ' GB / ' + d.ram_total + ' GB';
+
+    // Disco
+    updateMetric('disk-val', d.disk_pct, 'disk-sub', 'disk-bar', 'm-disk');
+    document.getElementById('disk-sub').textContent = d.disk_free + ' GB livres';
+
+    // Rede
+    document.getElementById('net-val').textContent = d.net_speed;
+    document.getElementById('net-sub').textContent = '↑ ' + d.net_sent + ' · ↓ ' + d.net_recv;
+
+    // Processos
+    const pl = document.getElementById('processes-list');
+    if (d.processes && d.processes.length) {
+      pl.innerHTML = d.processes.slice(0,10).map(p => {
+        const cls = p.cpu > 50 ? 'very-high' : p.cpu > 20 ? 'high' : '';
+        return `<div class="process-item">
+          <span class="process-name">${p.name}</span>
+          <span class="process-cpu ${cls}">${p.cpu}% CPU · ${p.mem} MB</span>
+        </div>`;
+      }).join('');
+    }
+
+    // Alertas automáticos
+    const now = new Date().toLocaleTimeString('pt-BR');
+    if (d.cpu >= 90) addAlert('danger', `CPU crítica: ${d.cpu}%`, now);
+    if (d.ram_pct >= 90) addAlert('danger', `RAM crítica: ${d.ram_pct}%`, now);
+    if (d.disk_pct >= 90) addAlert('danger', `Disco quase cheio: ${d.disk_pct}%`, now);
+    if (d.cpu >= 70 && d.cpu < 90) addAlert('warn', `CPU elevada: ${d.cpu}%`, now);
+    if (d.suspicious_procs && d.suspicious_procs.length) {
+      d.suspicious_procs.forEach(p => addAlert('danger', `Processo suspeito: ${p}`, now));
+    }
+  }
+
+  function addAlert(type, text, time) {
+    alerts.unshift({ type, text, time });
+    if (alerts.length > 20) alerts.pop();
+    const al = document.getElementById('alerts-list');
+    al.innerHTML = alerts.map(a => `
+      <div class="alert-item">
+        <div class="alert-dot ${a.type}"></div>
+        <div>
+          <div class="alert-text">${a.text}</div>
+          <div class="alert-time">${a.time}</div>
+        </div>
+      </div>`).join('');
+  }
+</script>
+</body>
+</html>
